@@ -22,4 +22,5 @@ public class UserLoginRdo {
 	private Integer gender;
 	private List<Role> roles;
 	private List<UserWorkspaceRdo> userWorkspaces;
+	private UserProfileRdo userProfile;
 }
