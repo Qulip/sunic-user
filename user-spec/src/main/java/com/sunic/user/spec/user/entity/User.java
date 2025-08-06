@@ -188,4 +188,25 @@ public class User {
 			.lastLoginFailTime(this.lastLoginFailTime)
 			.build();
 	}
+
+	public User deleteRole(Role role) {
+		List<Role> newRoles = new ArrayList<>(this.roles != null ? this.roles : new ArrayList<>());
+		newRoles.remove(role);
+
+		return User.builder()
+			.id(this.id)
+			.email(this.email)
+			.name(this.name)
+			.password(this.password)
+			.phone(this.phone)
+			.birthYear(this.birthYear)
+			.gender(this.gender)
+			.roles(newRoles)
+			.userWorkspaces(this.userWorkspaces)
+			.loginFailCount(this.loginFailCount)
+			.lastLoginTime(this.lastLoginTime)
+			.lastLoginFailTime(this.lastLoginFailTime)
+			.userProfile(this.userProfile)
+			.build();
+	}
 }

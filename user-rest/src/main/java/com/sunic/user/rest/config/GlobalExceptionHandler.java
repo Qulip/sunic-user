@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.sunic.user.spec.common.ErrorResponse;
 import com.sunic.user.spec.user.exception.InvalidCredentialsException;
+import com.sunic.user.spec.user.exception.UnauthorizedAccessException;
 import com.sunic.user.spec.user.exception.UserAlreadyExistsException;
 import com.sunic.user.spec.user.exception.UserNotFoundException;
 import com.sunic.user.spec.userworkspace.exception.InvalidWorkspaceStateException;
@@ -30,6 +31,13 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(
 			ErrorResponse.from(false, e.getMessage()),
 			HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(UnauthorizedAccessException.class)
+	public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedAccessException e) {
+		return new ResponseEntity<>(
+			ErrorResponse.from(false, e.getMessage()),
+			HttpStatus.FORBIDDEN);
 	}
 
 	@ExceptionHandler(UserNotFoundException.class)

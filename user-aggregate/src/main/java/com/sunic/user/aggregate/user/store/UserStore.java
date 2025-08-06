@@ -11,16 +11,19 @@ import com.sunic.user.aggregate.user.store.jpo.DeactivatedUserJpo;
 import com.sunic.user.aggregate.user.store.jpo.DeactivatedUserProfileJpo;
 import com.sunic.user.aggregate.user.store.jpo.UserJpo;
 import com.sunic.user.aggregate.user.store.jpo.UserProfileJpo;
+import com.sunic.user.aggregate.user.store.jpo.UserRoleHistoryJpo;
 import com.sunic.user.aggregate.user.store.jpo.UserWorkspaceJpo;
 import com.sunic.user.aggregate.user.store.repository.DeactivatedUserProfileRepository;
 import com.sunic.user.aggregate.user.store.repository.DeactivatedUserRepository;
 import com.sunic.user.aggregate.user.store.repository.UserProfileRepository;
 import com.sunic.user.aggregate.user.store.repository.UserRepository;
+import com.sunic.user.aggregate.user.store.repository.UserRoleHistoryRepository;
 import com.sunic.user.aggregate.user.store.repository.UserWorkspaceRepository;
 import com.sunic.user.spec.user.entity.DeactivatedUser;
 import com.sunic.user.spec.user.entity.DeactivatedUserProfile;
 import com.sunic.user.spec.user.entity.User;
 import com.sunic.user.spec.user.entity.UserProfile;
+import com.sunic.user.spec.user.entity.UserRoleHistory;
 import com.sunic.user.spec.user.exception.UserNotFoundException;
 import com.sunic.user.spec.userworkspace.entity.UserWorkspace;
 
@@ -34,6 +37,7 @@ public class UserStore {
 	private final UserWorkspaceRepository userWorkspaceRepository;
 	private final UserProfileRepository userProfileRepository;
 	private final DeactivatedUserProfileRepository deactivatedUserProfileRepository;
+	private final UserRoleHistoryRepository userRoleHistoryRepository;
 
 	public boolean existsByEmail(String email) {
 		return userRepository.existsByEmail(email);
@@ -121,5 +125,30 @@ public class UserStore {
 	public Optional<DeactivatedUserProfile> findDeactivatedUserProfileByUserId(Integer userId) {
 		return deactivatedUserProfileRepository.findByUserId(userId)
 			.map(DeactivatedUserProfileJpo::toEntity);
+	}
+
+	public void saveUserRoleHistory(UserRoleHistory userRoleHistory) {
+		userRoleHistoryRepository.save(UserRoleHistoryJpo.fromDomain(userRoleHistory));
+	}
+
+	public List<UserRoleHistory> findUserRoleHistoryByUserId(Integer userId) {
+		return userRoleHistoryRepository.findByUserIdOrderByActionDateDesc(userId)
+			.stream()
+			.map(UserRoleHistoryJpo::toDomain)
+			.collect(Collectors.toList());
+	}
+
+	public List<UserRoleHistory> findUserRoleHistoryByAdminId(Integer adminId) {
+		return userRoleHistoryRepository.findByAdminIdOrderByActionDateDesc(adminId)
+			.stream()
+			.map(UserRoleHistoryJpo::toDomain)
+			.collect(Collectors.toList());
+	}
+
+	public List<UserRoleHistory> findUserRoleHistoryByRequesterId(Integer requesterId) {
+		return userRoleHistoryRepository.findByRequesterIdOrderByActionDateDesc(requesterId)
+			.stream()
+			.map(UserRoleHistoryJpo::toDomain)
+			.collect(Collectors.toList());
 	}
 }

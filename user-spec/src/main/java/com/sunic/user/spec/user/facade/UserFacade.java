@@ -6,6 +6,7 @@ import com.sunic.user.spec.common.CommonResponse;
 import com.sunic.user.spec.user.facade.sdo.UserActivateSdo;
 import com.sunic.user.spec.user.facade.sdo.UserAddRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
+import com.sunic.user.spec.user.facade.sdo.UserDeleteRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
 import com.sunic.user.spec.user.facade.sdo.UserRegisterSdo;
@@ -49,4 +50,8 @@ public interface UserFacade {
 	@Operation(summary = "add role to user", description = "add role to user API")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Success")})
 	ResponseEntity<CommonResponse> addRoleToUser(UserAddRoleSdo userAddRoleSdo);
+
+	@Operation(summary = "delete role from user", description = "delete role from user API")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Success")})
+	ResponseEntity<CommonResponse> deleteRoleFromUser(UserDeleteRoleSdo userDeleteRoleSdo);
 }

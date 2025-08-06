@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class UserAddRoleSdo {
+public class UserDeleteRoleSdo {
 	private Integer adminId;
 	private Integer userId;
 	private Role role;

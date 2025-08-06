@@ -2,6 +2,7 @@ package com.sunic.user.rest.rest.user;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.sunic.user.spec.user.facade.UserFacade;
 import com.sunic.user.spec.user.facade.sdo.UserActivateSdo;
 import com.sunic.user.spec.user.facade.sdo.UserAddRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
+import com.sunic.user.spec.user.facade.sdo.UserDeleteRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
@@ -82,6 +84,13 @@ public class UserResource implements UserFacade {
 	@PostMapping("/role/add")
 	public ResponseEntity<CommonResponse> addRoleToUser(@RequestBody UserAddRoleSdo userAddRoleSdo) {
 		userLogic.addRoleToUser(userAddRoleSdo);
+		return new ResponseEntity<>(CommonResponse.from(true, "Success"), HttpStatus.OK);
+	}
+
+	@Override
+	@DeleteMapping("/role/delete")
+	public ResponseEntity<CommonResponse> deleteRoleFromUser(@RequestBody UserDeleteRoleSdo userDeleteRoleSdo) {
+		userLogic.deleteRoleFromUser(userDeleteRoleSdo);
 		return new ResponseEntity<>(CommonResponse.from(true, "Success"), HttpStatus.OK);
 	}
 }

@@ -13,12 +13,16 @@ import com.sunic.user.spec.user.entity.DeactivatedUserProfile;
 import com.sunic.user.spec.user.entity.DeactivationReason;
 import com.sunic.user.spec.user.entity.User;
 import com.sunic.user.spec.user.entity.UserProfile;
+import com.sunic.user.spec.user.entity.UserRoleHistory;
+import com.sunic.user.spec.user.entity.UserRoleHistoryType;
 import com.sunic.user.spec.user.exception.InvalidCredentialsException;
+import com.sunic.user.spec.user.exception.UnauthorizedAccessException;
 import com.sunic.user.spec.user.exception.UserAlreadyExistsException;
 import com.sunic.user.spec.user.exception.UserNotFoundException;
 import com.sunic.user.spec.user.facade.sdo.UserActivateSdo;
 import com.sunic.user.spec.user.facade.sdo.UserAddRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
+import com.sunic.user.spec.user.facade.sdo.UserDeleteRoleSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
@@ -183,10 +187,45 @@ public class UserLogic {
 
 	@Transactional
 	public void addRoleToUser(UserAddRoleSdo userAddRoleSdo) {
+		if (!checkAdminUser(userAddRoleSdo.getAdminId())) {
+			throw new UnauthorizedAccessException("Only admin users can add roles to other users");
+		}
+
 		User user = userStore.findById(userAddRoleSdo.getUserId())
 			.orElseThrow(() -> new UserNotFoundException("User not found with id: " + userAddRoleSdo.getUserId()));
 
 		User updatedUser = user.addRole(userAddRoleSdo.getRole());
 		userStore.save(updatedUser);
+
+		UserRoleHistory roleHistory = UserRoleHistory.create(
+			userAddRoleSdo.getUserId(),
+			userAddRoleSdo.getRole(),
+			UserRoleHistoryType.ROLE_ADDED,
+			userAddRoleSdo.getAdminId(),
+			userAddRoleSdo.getRequesterId()
+		);
+		userStore.saveUserRoleHistory(roleHistory);
+	}
+
+	@Transactional
+	public void deleteRoleFromUser(UserDeleteRoleSdo userDeleteRoleSdo) {
+		if (!checkAdminUser(userDeleteRoleSdo.getAdminId())) {
+			throw new UnauthorizedAccessException("Only admin users can delete roles from other users");
+		}
+
+		User user = userStore.findById(userDeleteRoleSdo.getUserId())
+			.orElseThrow(() -> new UserNotFoundException("User not found with id: " + userDeleteRoleSdo.getUserId()));
+
+		User updatedUser = user.deleteRole(userDeleteRoleSdo.getRole());
+		userStore.save(updatedUser);
+
+		UserRoleHistory roleHistory = UserRoleHistory.create(
+			userDeleteRoleSdo.getUserId(),
+			userDeleteRoleSdo.getRole(),
+			UserRoleHistoryType.ROLE_DELETED,
+			userDeleteRoleSdo.getAdminId(),
+			userDeleteRoleSdo.getRequesterId()
+		);
+		userStore.saveUserRoleHistory(roleHistory);
 	}
 }
