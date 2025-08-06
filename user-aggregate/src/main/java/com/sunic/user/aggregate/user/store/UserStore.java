@@ -19,6 +19,7 @@ import com.sunic.user.aggregate.user.store.repository.UserRepository;
 import com.sunic.user.aggregate.user.store.repository.UserWorkspaceRepository;
 import com.sunic.user.spec.user.entity.DeactivatedUser;
 import com.sunic.user.spec.user.entity.DeactivatedUserProfile;
+import com.sunic.user.spec.user.entity.Role;
 import com.sunic.user.spec.user.entity.User;
 import com.sunic.user.spec.user.entity.UserProfile;
 import com.sunic.user.spec.user.exception.UserNotFoundException;
@@ -121,5 +122,19 @@ public class UserStore {
 	public Optional<DeactivatedUserProfile> findDeactivatedUserProfileByUserId(Integer userId) {
 		return deactivatedUserProfileRepository.findByUserId(userId)
 			.map(DeactivatedUserProfileJpo::toEntity);
+	}
+
+	public List<User> findAllNonAdminUsers() {
+		return userRepository.findByRoleNot(Role.ADMIN)
+			.stream()
+			.map(UserJpo::toEntity)
+			.collect(Collectors.toList());
+	}
+
+	public List<User> searchNonAdminUsers(String name, String email, String phone, Integer workspaceId) {
+		return userRepository.searchNonAdminUsers(Role.ADMIN, name, email, phone, workspaceId)
+			.stream()
+			.map(UserJpo::toEntity)
+			.collect(Collectors.toList());
 	}
 }

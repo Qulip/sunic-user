@@ -1,11 +1,15 @@
 package com.sunic.user.rest.rest.user;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sunic.user.aggregate.user.logic.UserLogic;
@@ -14,9 +18,11 @@ import com.sunic.user.spec.user.facade.UserFacade;
 import com.sunic.user.spec.user.facade.sdo.UserActivateSdo;
 import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
+import com.sunic.user.spec.user.facade.sdo.UserListRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
 import com.sunic.user.spec.user.facade.sdo.UserRegisterSdo;
+import com.sunic.user.spec.user.facade.sdo.UserSearchSdo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,5 +81,19 @@ public class UserResource implements UserFacade {
 	public ResponseEntity<CommonResponse> joinWorkspace(@RequestBody UserJoinSdo userJoinSdo) {
 		userLogic.joinWorkspace(userJoinSdo);
 		return new ResponseEntity<>(CommonResponse.from(true, "Success"), HttpStatus.OK);
+	}
+
+	@Override
+	@GetMapping("/non-admin")
+	public ResponseEntity<CommonResponse> getAllNonAdminUsers(@RequestParam("adminId") Integer adminId) {
+		List<UserListRdo> users = userLogic.getAllNonAdminUsers(adminId);
+		return new ResponseEntity<>(CommonResponse.from(true, "Success", users), HttpStatus.OK);
+	}
+
+	@Override
+	@PostMapping("/search")
+	public ResponseEntity<CommonResponse> searchNonAdminUsers(@RequestBody UserSearchSdo userSearchSdo) {
+		List<UserListRdo> users = userLogic.searchNonAdminUsers(userSearchSdo);
+		return new ResponseEntity<>(CommonResponse.from(true, "Success", users), HttpStatus.OK);
 	}
 }

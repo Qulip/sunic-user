@@ -1,5 +1,7 @@
 package com.sunic.user.spec.user.facade.sdo;
 
+import java.time.LocalDateTime;
+
 import com.sunic.user.spec.user.entity.Role;
 
 import lombok.AllArgsConstructor;
@@ -11,14 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class UserRegisterSdo {
+public class UserListRdo {
+	private Integer id;
 	private String email;
 	private String name;
-	private String password;
 	private String phone;
 	private String birthYear;
 	private Integer gender;
 	private Role role;
-	private UserProfileCdo userProfile;
-	private Integer workspaceId;
+	private Integer loginFailCount;
+	private LocalDateTime lastLoginTime;
+	private LocalDateTime lastLoginFailTime;
+	private UserProfileRdo userProfile;
 }
