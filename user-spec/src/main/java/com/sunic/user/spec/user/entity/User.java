@@ -150,7 +150,7 @@ public class User {
 			.phone(this.phone)
 			.birthYear(this.birthYear)
 			.gender(this.gender)
-			.role(this.role)
+			.roles(this.roles)
 			.userWorkspaces(this.userWorkspaces)
 			.loginFailCount(this.loginFailCount)
 			.lastLoginTime(this.lastLoginTime)
