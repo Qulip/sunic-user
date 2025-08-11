@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sunic.user.spec.user.facade.sdo.UserListRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginRdo;
 import com.sunic.user.spec.user.facade.sdo.UserProfileRdo;
 import com.sunic.user.spec.user.facade.sdo.UserRegisterSdo;
@@ -110,16 +111,7 @@ public class User {
 
 	public UserLoginRdo toLoginRdo() {
 		UserProfileRdo userProfileRdo = this.userProfile != null ?
-			UserProfileRdo.builder()
-				.id(this.userProfile.getId())
-				.nickName(this.userProfile.getNickName())
-				.univName(this.userProfile.getUnivName())
-				.univYear(this.userProfile.getUnivYear())
-				.univSemester(this.userProfile.getUnivSemester())
-				.majorCategory(this.userProfile.getMajorCategory())
-				.majorName(this.userProfile.getMajorName())
-				.profileImgUrl(this.userProfile.getProfileImgUrl())
-				.build() : null;
+			this.userProfile.toRdo() : null;
 		
 		return UserLoginRdo.builder()
 			.id(this.id)
@@ -153,5 +145,24 @@ public class User {
 
 	public boolean isAdmin() {
 		return this.role == Role.ADMIN;
+	}
+
+	public UserListRdo toListRdo() {
+		UserProfileRdo userProfileRdo = this.userProfile != null ?
+			this.userProfile.toRdo() : null;
+
+		return UserListRdo.builder()
+			.id(this.id)
+			.email(this.email)
+			.name(this.name)
+			.phone(this.phone)
+			.birthYear(this.birthYear)
+			.gender(this.gender)
+			.role(this.role)
+			.loginFailCount(this.loginFailCount)
+			.lastLoginTime(this.lastLoginTime)
+			.lastLoginFailTime(this.lastLoginFailTime)
+			.userProfile(userProfileRdo)
+			.build();
 	}
 }

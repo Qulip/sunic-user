@@ -2,6 +2,7 @@ package com.sunic.user.aggregate.user.logic;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -14,14 +15,17 @@ import com.sunic.user.spec.user.entity.DeactivationReason;
 import com.sunic.user.spec.user.entity.User;
 import com.sunic.user.spec.user.entity.UserProfile;
 import com.sunic.user.spec.user.exception.InvalidCredentialsException;
+import com.sunic.user.spec.user.exception.UnauthorizedAccessException;
 import com.sunic.user.spec.user.exception.UserAlreadyExistsException;
 import com.sunic.user.spec.user.exception.UserNotFoundException;
 import com.sunic.user.spec.user.facade.sdo.UserActivateSdo;
 import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
+import com.sunic.user.spec.user.facade.sdo.UserListRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginRdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
 import com.sunic.user.spec.user.facade.sdo.UserRegisterSdo;
+import com.sunic.user.spec.user.facade.sdo.UserSearchSdo;
 import com.sunic.user.spec.userworkspace.entity.UserWorkspace;
 import com.sunic.user.spec.userworkspace.exception.UserWorkspaceAlreadyExistsException;
 import com.sunic.user.spec.userworkspace.exception.WorkspaceNotFoundException;
@@ -44,12 +48,29 @@ public class UserLogic {
 		User user = User.create(userRegisterSdo, passwordEncoder.encode(userRegisterSdo.getPassword()));
 		userStore.save(user);
 
+		User savedUser = userStore.findByEmail(userRegisterSdo.getEmail())
+			.orElseThrow(() -> new UserNotFoundException("Failed to retrieve saved user"));
+
 		if (userRegisterSdo.getUserProfile() != null) {
-			UserProfile userProfile = UserProfile.create(user.getId(), userRegisterSdo.getUserProfile());
+			UserProfile userProfile = UserProfile.create(savedUser.getId(), userRegisterSdo.getUserProfile());
 			userStore.saveUserProfile(userProfile);
+		}
+
+		if (userRegisterSdo.getWorkspaceId() != null) {
+			UserWorkspace workspace = userStore.findWorkspaceById(userRegisterSdo.getWorkspaceId())
+				.orElseThrow(() -> new WorkspaceNotFoundException(
+					"Workspace not found with id: " + userRegisterSdo.getWorkspaceId()));
+
+			UserJoinSdo userJoinSdo = UserJoinSdo.builder()
+				.userId(savedUser.getId())
+				.workspaceId(userRegisterSdo.getWorkspaceId())
+				.build();
+
+			joinWorkspace(userJoinSdo);
 		}
 	}
 
+	@Transactional
 	public UserLoginRdo loginUser(UserLoginSdo userLoginSdo) {
 		User user = userStore.findByEmail(userLoginSdo.getEmail())
 			.orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
@@ -115,7 +136,7 @@ public class UserLogic {
 	}
 
 	@Transactional
-	private void deactivateUser(int userId, DeactivationReason deactivationReason) {
+	protected void deactivateUser(int userId, DeactivationReason deactivationReason) {
 		User user = userStore.findById(userId)
 			.orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
@@ -178,5 +199,40 @@ public class UserLogic {
 		return userStore.findById(userId)
 			.map(User::isAdmin)
 			.orElse(false);
+	}
+
+	public List<UserListRdo> getAllNonAdminUsers(Integer adminId) {
+		if (!checkAdminUser(adminId)) {
+			throw new UnauthorizedAccessException("Only admin users can view all users");
+		}
+
+		List<User> nonAdminUsers = userStore.findAllNonAdminUsers();
+
+		return nonAdminUsers.stream()
+			.map(user -> {
+				UserProfile userProfile = userStore.findUserProfileByUserId(user.getId()).orElse(null);
+				return user.withUserProfile(userProfile).toListRdo();
+			})
+			.collect(Collectors.toList());
+	}
+
+	public List<UserListRdo> searchNonAdminUsers(UserSearchSdo userSearchSdo) {
+		if (!checkAdminUser(userSearchSdo.getAdminId())) {
+			throw new UnauthorizedAccessException("Only admin users can search users");
+		}
+
+		List<User> searchResults = userStore.searchNonAdminUsers(
+			userSearchSdo.getName(),
+			userSearchSdo.getEmail(),
+			userSearchSdo.getPhone(),
+			userSearchSdo.getWorkspaceId()
+		);
+
+		return searchResults.stream()
+			.map(user -> {
+				UserProfile userProfile = userStore.findUserProfileByUserId(user.getId()).orElse(null);
+				return user.withUserProfile(userProfile).toListRdo();
+			})
+			.collect(Collectors.toList());
 	}
 }

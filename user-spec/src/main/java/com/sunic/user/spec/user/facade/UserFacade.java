@@ -8,6 +8,7 @@ import com.sunic.user.spec.user.facade.sdo.UserDeactivateByAdminSdo;
 import com.sunic.user.spec.user.facade.sdo.UserJoinSdo;
 import com.sunic.user.spec.user.facade.sdo.UserLoginSdo;
 import com.sunic.user.spec.user.facade.sdo.UserRegisterSdo;
+import com.sunic.user.spec.user.facade.sdo.UserSearchSdo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,4 +45,12 @@ public interface UserFacade {
 	@Operation(summary = "join workspace", description = "join workspace API")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Success")})
 	ResponseEntity<CommonResponse> joinWorkspace(UserJoinSdo userJoinSdo);
+
+	@Operation(summary = "get all non-admin users", description = "get all non-admin users API (Admin only)")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Success")})
+	ResponseEntity<CommonResponse> getAllNonAdminUsers(Integer adminId);
+
+	@Operation(summary = "search non-admin users", description = "search non-admin users by name, email, phone, or workspace (Admin only)")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Success")})
+	ResponseEntity<CommonResponse> searchNonAdminUsers(UserSearchSdo userSearchSdo);
 }
